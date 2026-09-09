@@ -1,19 +1,18 @@
-import { StyleSheet, Text, View, Button } from "react-native";
-import { useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+
+const ITEMS = ["財布", "定期", "スマホ", "家の鍵", "社員証"];
 
 export default function Home() {
-  const [count, setCount] = useState<number>(0);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>最初の画面</Text>
       <Text>右上の⚙をタップすると設定画面へ</Text>
-      <Text>押した回数{count}</Text>
-      <Button
-        title="ボタン"
-        onPress={() => {
-          setCount(count + 1);
-        }}
-      ></Button>
+
+      {/* TODO: 削除機能を付けるとき items を {id, text} のオブジェクト配列にして
+          key を index → 固有ID に変える(index key は削除で対応付けがズレるため) */}
+      {ITEMS.map((item, index) => (
+        <Text key={index}>{item}</Text>
+      ))}
     </View>
   );
 }
