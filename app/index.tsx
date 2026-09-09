@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View } from "react-native";
-import { Checklist } from "../types";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Checklist, Item } from "../types";
+import { useState } from "react";
 
 const deafaultList: Checklist = {
   id: "1",
@@ -19,13 +20,29 @@ const deafaultList: Checklist = {
 };
 
 export default function Home() {
+  const [items, setItems] = useState<Item[]>(deafaultList.items);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>最初の画面</Text>
       <Text>右上の⚙をタップすると設定画面へ</Text>
 
-      {deafaultList.items.map((item) => (
-        <Text key={item.id}>{item.name}</Text>
+      {items.map((item) => (
+        <Pressable
+          key={item.id}
+          onPress={() => {
+            setItems(
+              items.map((element) =>
+                element.id === item.id
+                  ? { ...element, checked: !element.checked }
+                  : element,
+              ),
+            );
+          }}
+        >
+          <Text>{item.checked ? "✅" : "⬜️"}</Text>
+
+          <Text>{item.name} </Text>
+        </Pressable>
       ))}
     </View>
   );
