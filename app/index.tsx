@@ -1,6 +1,22 @@
 import { StyleSheet, Text, View } from "react-native";
+import { Checklist } from "../types";
 
-const ITEMS = ["財布", "定期", "スマホ", "家の鍵", "社員証"];
+const deafaultList: Checklist = {
+  id: "1",
+  name: "デフォルト",
+  items: [
+    {
+      id: "1",
+      name: "財布",
+      checked: false,
+    },
+    {
+      id: "2",
+      name: "定期券",
+      checked: false,
+    },
+  ],
+};
 
 export default function Home() {
   return (
@@ -8,10 +24,8 @@ export default function Home() {
       <Text style={styles.title}>最初の画面</Text>
       <Text>右上の⚙をタップすると設定画面へ</Text>
 
-      {/* TODO: 削除機能を付けるとき items を {id, text} のオブジェクト配列にして
-          key を index → 固有ID に変える(index key は削除で対応付けがズレるため) */}
-      {ITEMS.map((item, index) => (
-        <Text key={index}>{item}</Text>
+      {deafaultList.items.map((item) => (
+        <Text key={item.id}>{item.name}</Text>
       ))}
     </View>
   );
