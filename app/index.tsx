@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Checklist, Item } from "../types";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import ListNameLabel from "../components/ListNameLabel";
 const deafaultList: Checklist = {
   id: "1",
   name: "デフォルト",
@@ -30,6 +31,7 @@ export default function Home() {
       {items.map((item) => (
         <Pressable
           key={item.id}
+          style={styles.listitem}
           onPress={() => {
             setItems(
               items.map((element) =>
@@ -45,6 +47,7 @@ export default function Home() {
             {item.name}{" "}
             {item.icon && <Ionicons name={item.icon} size={20} color="#555" />}
           </Text>
+          <ListNameLabel />
         </Pressable>
       ))}
     </View>
