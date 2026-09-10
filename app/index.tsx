@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Checklist, Item } from "../types";
 import { useState } from "react";
-
+import { Ionicons } from "@expo/vector-icons";
 const deafaultList: Checklist = {
   id: "1",
   name: "デフォルト",
@@ -10,6 +10,7 @@ const deafaultList: Checklist = {
       id: "1",
       name: "財布",
       checked: false,
+      icon: "wallet-outline",
     },
     {
       id: "2",
@@ -39,9 +40,11 @@ export default function Home() {
             );
           }}
         >
-          <Text>{item.checked ? "✅" : "⬜️"}</Text>
-
-          <Text>{item.name} </Text>
+          <Text>
+            {item.checked ? "✅" : "⬜️"}
+            {item.name}{" "}
+            {item.icon && <Ionicons name={item.icon} size={20} color="#555" />}
+          </Text>
         </Pressable>
       ))}
     </View>
@@ -60,4 +63,5 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
   },
+  listitem: { flexDirection: "row", gap: 8 },
 });
