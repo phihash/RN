@@ -1,28 +1,12 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Checklist, Item } from "../types";
+import { Item } from "../types";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import ListNameLabel from "../components/ListNameLabel";
-const deafaultList: Checklist = {
-  id: "1",
-  name: "デフォルト",
-  items: [
-    {
-      id: "1",
-      name: "財布",
-      checked: false,
-      icon: "wallet-outline",
-    },
-    {
-      id: "2",
-      name: "定期券",
-      checked: false,
-    },
-  ],
-};
+import { defaultList } from "../data";
 
 export default function Home() {
-  const [items, setItems] = useState<Item[]>(deafaultList.items);
+  const [items, setItems] = useState<Item[]>(defaultList.items);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>最初の画面</Text>
