@@ -15,12 +15,18 @@ export default function RootLayout() {
         options={{
           title: "ホーム",
           headerRight: () => (
-            <Link href="/settings">
-              <Ionicons name="settings-outline" size={24} color="#4a90d9" />
-            </Link>
+            <>
+              <Link href="/settings">
+                <Ionicons name="settings-outline" size={24} color="#4a90d9" />
+              </Link>
+              <Link href="/menu">
+                <Ionicons name="list" size={24} color="#4a90d9" />
+              </Link>
+            </>
           ),
         }}
       />
+      <Stack.Screen name="menu" options={{ title: "メニュー" }} />
       <Stack.Screen name="settings" options={{ title: "設定" }} />
     </Stack>
   );

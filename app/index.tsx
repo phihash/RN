@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View, FlatList } from "react-native";
 import { Item } from "../types";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,29 +11,35 @@ export default function Home() {
     <View style={styles.container}>
       <Text style={styles.title}>最初の画面</Text>
       <Text>右上の⚙をタップすると設定画面へ</Text>
+      <Pressable onPress={() => {}}>メニュー</Pressable>
 
-      {items.map((item) => (
-        <Pressable
-          key={item.id}
-          style={styles.listitem}
-          onPress={() => {
-            setItems(
-              items.map((element) =>
-                element.id === item.id
-                  ? { ...element, checked: !element.checked }
-                  : element,
-              ),
-            );
-          }}
-        >
-          <Text>
-            {item.checked ? "✅" : "⬜️"}
-            {item.name}{" "}
-            {item.icon && <Ionicons name={item.icon} size={20} color="#555" />}
-          </Text>
-          <ListNameLabel />
-        </Pressable>
-      ))}
+      <FlatList
+        data={items}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <Pressable
+            style={styles.listitem}
+            onPress={() => {
+              setItems(
+                items.map((element) =>
+                  element.id === item.id
+                    ? { ...element, checked: !element.checked }
+                    : element,
+                ),
+              );
+            }}
+          >
+            <Text>
+              {item.checked ? "✅" : "⬜️"}
+              {item.name}{" "}
+              {item.icon && (
+                <Ionicons name={item.icon} size={20} color="#555" />
+              )}
+            </Text>
+            <ListNameLabel />
+          </Pressable>
+        )}
+      />
     </View>
   );
 }
