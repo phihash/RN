@@ -3,19 +3,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { IconName } from "../types";
 
 type ItemCardProps = {
-  color?: string;
-  listname?: string;
-  iconName?: IconName;
+  name: string;
+  icon?: IconName;
 };
 
-export default function ItemCard({ color, listname, iconName }: ItemCardProps) {
+export default function ItemCard({ name, icon }: ItemCardProps) {
   return (
     <View style={styles.chip}>
-      <View style={[styles.square, color && { backgroundColor: color }]} />
-      <Text style={styles.name}>{listname ?? "アイテム"}</Text>
-      <Text>
-        {iconName && <Ionicons name={iconName} size={16} color="#555" />}
-      </Text>
+      <Text>{icon && <Ionicons name={icon} size={24} color="#555" />}</Text>
+      <Text style={styles.name}>{name}</Text>
     </View>
   );
 }
@@ -25,18 +21,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: "#dbe4ea",
     borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    padding: 16,
     backgroundColor: "#fff",
-  },
-  square: {
-    width: 16,
-    height: 16,
-    borderRadius: 4,
-    backgroundColor: "#9b59b6",
   },
   name: {
     fontSize: 18,

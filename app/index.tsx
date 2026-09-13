@@ -3,15 +3,17 @@ import { Item } from "../types";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import ListNameLabel from "../components/ListNameLabel";
-import { defaultList } from "../data";
+import { defaultItems } from "../data";
+import { Link } from "expo-router";
 
 export default function Home() {
-  const [items, setItems] = useState<Item[]>(defaultList.items);
+  const [items, setItems] = useState<Item[]>(defaultItems);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>最初の画面</Text>
       <Text>右上の⚙をタップすると設定画面へ</Text>
-      <Pressable onPress={() => {}}>メニュー</Pressable>
+
+      <Link href="/menu">メニュー</Link>
 
       <FlatList
         data={items}
