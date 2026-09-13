@@ -8,7 +8,6 @@ export default function Menu() {
       <FlatList
         data={defaultItems}
         keyExtractor={(item) => item.id}
-        columnWrapperStyle={styles.row}
         contentContainerStyle={styles.grid}
         renderItem={({ item }) => (
           <ItemRow name={item.name} icon={item.icon} />
@@ -25,9 +24,6 @@ const styles = StyleSheet.create({
   },
   grid: {
     padding: 16,
-    gap: 12,
-  },
-  row: {
     gap: 12,
   },
 });
