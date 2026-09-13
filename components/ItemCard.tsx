@@ -2,21 +2,17 @@ import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { IconName } from "../types";
 
-type ListNameLabelProps = {
+type ItemCardProps = {
   color?: string;
   listname?: string;
   iconName?: IconName;
 };
 
-export default function ListNameLabel({
-  color,
-  listname,
-  iconName,
-}: ListNameLabelProps) {
+export default function ItemCard({ color, listname, iconName }: ItemCardProps) {
   return (
     <View style={styles.chip}>
       <View style={[styles.square, color && { backgroundColor: color }]} />
-      <Text style={styles.name}>{listname ?? "ラベル"}</Text>
+      <Text style={styles.name}>{listname ?? "アイテム"}</Text>
       <Text>
         {iconName && <Ionicons name={iconName} size={16} color="#555" />}
       </Text>
