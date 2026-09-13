@@ -12,7 +12,6 @@ export default function Home() {
     <View style={styles.container}>
       <Text style={styles.title}>最初の画面</Text>
       <Text>右上の⚙をタップすると設定画面へ</Text>
-
       <Link href="/menu">メニュー</Link>
 
       <FlatList

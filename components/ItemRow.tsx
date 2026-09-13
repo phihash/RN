@@ -2,14 +2,14 @@ import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { IconName } from "../types";
 
-type ItemCardProps = {
+type ItemRowProps = {
   name: string;
   icon?: IconName;
 };
 
-export default function ItemCard({ name, icon }: ItemCardProps) {
+export default function ItemRow({ name, icon }: ItemRowProps) {
   return (
-    <View style={styles.chip}>
+    <View style={styles.row}>
       <Text>{icon && <Ionicons name={icon} size={24} color="#555" />}</Text>
       <Text style={styles.name}>{name}</Text>
     </View>
@@ -17,7 +17,7 @@ export default function ItemCard({ name, icon }: ItemCardProps) {
 }
 
 const styles = StyleSheet.create({
-  chip: {
+  row: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,

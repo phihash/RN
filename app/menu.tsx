@@ -1,5 +1,5 @@
 import { FlatList, StyleSheet, View } from "react-native";
-import ItemCard from "../components/ItemCard";
+import ItemRow from "../components/ItemRow";
 import { defaultItems } from "../data";
 
 export default function Menu() {
@@ -8,11 +8,10 @@ export default function Menu() {
       <FlatList
         data={defaultItems}
         keyExtractor={(item) => item.id}
-        numColumns={3}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.grid}
         renderItem={({ item }) => (
-          <ItemCard name={item.name} icon={item.icon} />
+          <ItemRow name={item.name} icon={item.icon} />
         )}
       />
     </View>
