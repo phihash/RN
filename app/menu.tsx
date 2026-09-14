@@ -10,7 +10,11 @@ export default function Menu() {
     <View style={styles.container}>
       <View style={styles.tab}>
         {CATEGORIES.map((item) => {
-          return <Text>{item}</Text>;
+          return (
+            <Text key={item} style={styles.tabItem}>
+              {item}
+            </Text>
+          );
         })}
       </View>
 
@@ -29,7 +33,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  tabItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#dbe4ea",
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    backgroundColor: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#5a7684",
+  },
   tab: {
+    gap: 4,
     flexDirection: "row",
     padding: 16,
   },
