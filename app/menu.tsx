@@ -2,10 +2,10 @@ import { FlatList, StyleSheet, View, Text } from "react-native";
 import ItemRow from "../components/ItemRow";
 import { defaultItems } from "../data";
 import { useState } from "react";
-import { CATEGORIES } from "../types";
+import { CATEGORIES, Category } from "../types";
 
 export default function Menu() {
-  const [selectTab, setSelectTab] = useState("化粧品");
+  const [selectTab, setSelectTab] = useState<Category>("化粧品");
   return (
     <View style={styles.container}>
       <View style={styles.tab}>
