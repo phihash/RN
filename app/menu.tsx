@@ -5,7 +5,7 @@ import { useState } from "react";
 import { CATEGORIES, Category } from "../types";
 
 export default function Menu() {
-  const [selectTab, setSelectTab] = useState<Category>("化粧品");
+  const [selectTab, setSelectTab] = useState<Category>("貴重品");
   return (
     <View style={styles.container}>
       <View style={styles.tab}>
@@ -19,7 +19,9 @@ export default function Menu() {
       </View>
 
       <FlatList
-        data={defaultItems}
+        data={defaultItems.filter((data) => {
+          return data.category === selectTab;
+        })}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.grid}
         renderItem={({ item }) => <ItemRow name={item.name} icon={item.icon} />}
