@@ -21,9 +21,6 @@ export default function RootLayout() {
               <Link href="/settings">
                 <Ionicons name="settings-outline" size={24} color="#4a90d9" />
               </Link>
-              <Link href="/menu">
-                <Ionicons name="list" size={24} color="#4a90d9" />
-              </Link>
             </>
           ),
         }}
