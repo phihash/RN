@@ -1,7 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Link, Stack } from "expo-router";
+import { Link, Stack, useRouter } from "expo-router";
+import { Pressable, Text } from "react-native";
 
 export default function RootLayout() {
+  const router = useRouter();
   return (
     <Stack
       screenOptions={{
@@ -26,7 +28,24 @@ export default function RootLayout() {
           ),
         }}
       />
-      <Stack.Screen name="menu" options={{ title: "メニュー" }} />
+      <Stack.Screen
+        name="menu"
+        options={{
+          title: "メニュー",
+          presentation: "fullScreenModal",
+          headerRight: () => (
+            <>
+              <Pressable
+                onPress={() => {
+                  router.dismiss();
+                }}
+              >
+                <Text>閉じる</Text>
+              </Pressable>
+            </>
+          ),
+        }}
+      />
       <Stack.Screen name="settings" options={{ title: "設定" }} />
     </Stack>
   );
