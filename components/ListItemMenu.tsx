@@ -1,67 +1,55 @@
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import type { SavedList } from "../storage/list";
 
 type ListItemMenuProps = {
-  listName: string;
-  visible: boolean;
+  listItem: SavedList;
   onClose: () => void;
+  onRename: () => void;
+  onDelete: () => void;
 };
 
 export default function ListItemMenu({
-  listName,
-  visible,
+  listItem,
   onClose,
+  onRename,
+  onDelete,
 }: ListItemMenuProps) {
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <View style={styles.overlay}>
-        <Pressable
-          style={StyleSheet.absoluteFill}
-          onPress={onClose}
-          accessibilityLabel="メニューを閉じる"
-        />
-        <View style={styles.menu}>
-          <Text style={styles.menuTitle} numberOfLines={1}>
-            {listName}
-          </Text>
-          <View style={styles.menuOption}>
-            <Ionicons name="create-outline" size={22} color="#4a90d9" />
-            <Text style={styles.menuOptionText}>リスト名を変更</Text>
-          </View>
-          <View style={styles.menuOption}>
-            <Ionicons name="add-circle-outline" size={22} color="#4a90d9" />
-            <Text style={styles.menuOptionText}>リストにアイテムを追加する</Text>
-          </View>
-          <View style={styles.menuOption}>
-            <Ionicons name="trash-outline" size={22} color="#c54b4b" />
-            <Text style={styles.deleteText}>リストを削除する</Text>
-          </View>
-          <Pressable
-            style={styles.cancelButton}
-            onPress={onClose}
-            accessibilityRole="button"
-          >
-            <Text style={styles.cancelText}>キャンセル</Text>
-          </Pressable>
+    <View style={styles.menu}>
+      <Text style={styles.menuTitle} numberOfLines={1}>
+        {listItem.name}
+      </Text>
+      <Pressable accessibilityRole="button" onPress={onRename}>
+        <View style={styles.menuOption}>
+          <Ionicons name="create-outline" size={22} color="#4a90d9" />
+          <Text style={styles.menuOptionText}>リスト名を変更</Text>
         </View>
+      </Pressable>
+
+      <View style={styles.menuOption}>
+        <Ionicons name="add-circle-outline" size={22} color="#4a90d9" />
+        <Text style={styles.menuOptionText}>リストにアイテムを追加する</Text>
       </View>
-    </Modal>
+      <Pressable accessibilityRole="button" onPress={onDelete}>
+        <View style={styles.menuOption}>
+          <Ionicons name="trash-outline" size={22} color="#c54b4b" />
+          <Text style={styles.deleteText}>リストを削除する</Text>
+        </View>
+      </Pressable>
+
+      <Pressable
+        style={styles.cancelButton}
+        onPress={onClose}
+        accessibilityRole="button"
+      >
+        <Text style={styles.cancelText}>キャンセル</Text>
+      </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-    backgroundColor: "rgba(19, 35, 47, 0.45)",
-  },
   menu: {
     width: "100%",
     maxWidth: 400,

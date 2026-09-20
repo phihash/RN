@@ -1,22 +1,44 @@
 import { StyleSheet, Text, View, TextInput, Pressable } from "react-native";
-import { useRouter } from "expo-router";
+
 import { useState } from "react";
-import { createList } from "../storage/list";
+import { updateListName, type SavedList } from "../storage/list";
 import { useQueryClient } from "@tanstack/react-query";
 
-type ListFormProps = {
+type UpdateListFormProps = {
+  list: SavedList;
   onClose: () => void;
 };
 
-export default function ListForm({ onClose }: ListFormProps) {
-  const router = useRouter();
-  const [listName, setListName] = useState<string>("");
-  const canSubmit = listName.trim().length > 0;
+export default function UpdateListForm({ list, onClose }: UpdateListFormProps) {
+  const [listName, setListName] = useState(list.name);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
+  const canSubmit = listName.trim().length > 0 && !isSaving;
   const queryClient = useQueryClient();
+
+  const save = async () => {
+    if (!canSubmit) return;
+    setIsSaving(true);
+    setError("");
+    try {
+      const updated = await updateListName(list.id, listName);
+      if (!updated) {
+        setError("リストが見つかりません。もう一度お試しください。");
+        return;
+      }
+      await queryClient.invalidateQueries({ queryKey: ["lists"] });
+      onClose();
+    } catch (cause) {
+      console.error("リスト名の変更に失敗しました", cause);
+      setError("変更できませんでした。もう一度お試しください。");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>新しいリスト</Text>
         <Pressable
           onPress={onClose}
           accessibilityRole="button"
@@ -25,15 +47,21 @@ export default function ListForm({ onClose }: ListFormProps) {
           <Text style={styles.closeText}>閉じる</Text>
         </Pressable>
       </View>
+      <Text style={styles.title}>リスト名を変更</Text>
       <Text style={styles.label}>リスト名</Text>
       <TextInput
         style={styles.input}
         value={listName}
-        onChangeText={setListName}
-        placeholder="リスト名を入力してください"
+        onChangeText={(name) => {
+          setListName(name);
+          setError("");
+        }}
+        placeholder="変更するリスト名を入力してください"
         placeholderTextColor="#91a3ad"
         returnKeyType="done"
+        onSubmitEditing={save}
       />
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
       <Pressable
         accessibilityRole="button"
         disabled={!canSubmit}
@@ -42,17 +70,9 @@ export default function ListForm({ onClose }: ListFormProps) {
           !canSubmit && styles.buttonDisabled,
           pressed && styles.buttonPressed,
         ]}
-        onPress={async () => {
-          if (canSubmit) {
-            await createList(listName);
-
-            router.push("/item-catalog");
-            onClose();
-            await queryClient.invalidateQueries({ queryKey: ["lists"] });
-          }
-        }}
+        onPress={save}
       >
-        <Text style={styles.buttonText}>リストを作成</Text>
+        <Text style={styles.buttonText}>{isSaving ? "変更中..." : "リスト名を変更する"}</Text>
       </Pressable>
     </View>
   );
@@ -121,5 +141,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  errorText: {
+    color: "#c54b4b",
+    fontSize: 14,
   },
 });

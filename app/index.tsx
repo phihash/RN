@@ -1,19 +1,72 @@
-import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ListForm from "../components/ListForm";
 import ListItem from "../components/ListItem";
-import { getLists } from "../storage/list";
+import { deleteList, getLists, type SavedList } from "../storage/list";
+import UpdateListForm from "../components/UpdateListForm";
+import ListItemMenu from "../components/ListItemMenu";
+
+type ActiveOverlay =
+  | { kind: "create" }
+  | { kind: "menu"; list: SavedList }
+  | { kind: "rename"; list: SavedList }
+  | null;
 
 export default function Home() {
-  const { data: lists = [], isPending, isError } = useQuery({
+  const {
+    data: lists = [],
+    isPending,
+    isError,
+  } = useQuery({
     queryKey: ["lists"],
     queryFn: getLists,
     retry: false,
   });
-  const [showForm, setShowForm] = useState<boolean>(false);
+  const [activeOverlay, setActiveOverlay] = useState<ActiveOverlay>(null);
+  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+
+  const closeOverlay = () => setActiveOverlay(null);
+
+  const confirmDelete = (list: SavedList) => {
+    Alert.alert(
+      "リストを削除しますか？",
+      `「${list.name}」を削除します。この操作は取り消せません。`,
+      [
+        { text: "キャンセル", style: "cancel" },
+        {
+          text: "削除する",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const deleted = await deleteList(list.id);
+              if (!deleted) {
+                Alert.alert("削除できませんでした", "リストが見つかりません。");
+                return;
+              }
+              closeOverlay();
+              await queryClient.invalidateQueries({ queryKey: ["lists"] });
+            } catch (error) {
+              console.error("リストの削除に失敗しました", error);
+              Alert.alert("削除できませんでした", "もう一度お試しください。");
+            }
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -31,8 +84,15 @@ export default function Home() {
             ]}
             data={lists}
             keyExtractor={(item) => String(item.id)}
-            renderItem={({ item }) => <ListItem item={item} />}
-            ListEmptyComponent={<Text style={styles.emptyText}>リストはありません</Text>}
+            renderItem={({ item }) => (
+              <ListItem
+                item={item}
+                onMenuPress={(list) => setActiveOverlay({ kind: "menu", list })}
+              />
+            )}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>リストはありません</Text>
+            }
           />
         )}
       </View>
@@ -45,7 +105,7 @@ export default function Home() {
         <Pressable
           accessibilityRole="button"
           onPress={() => {
-            setShowForm(true);
+            setActiveOverlay({ kind: "create" });
           }}
           style={({ pressed }) => [
             styles.menuButton,
@@ -56,18 +116,37 @@ export default function Home() {
         </Pressable>
       </View>
       <Modal
-        visible={showForm}
+        visible={activeOverlay !== null}
         transparent
         animationType="fade"
-        onRequestClose={() => setShowForm(false)}
+        onRequestClose={closeOverlay}
       >
         <View style={styles.modalOverlay}>
           <Pressable
             style={StyleSheet.absoluteFill}
-            onPress={() => setShowForm(false)}
-            accessibilityLabel="フォームを閉じる"
+            onPress={closeOverlay}
+            accessibilityLabel="画面を閉じる"
           />
-          <ListForm onClose={() => setShowForm(false)} />
+          {activeOverlay?.kind === "create" && (
+            <ListForm onClose={closeOverlay} />
+          )}
+          {activeOverlay?.kind === "menu" && (
+            <ListItemMenu
+              listItem={activeOverlay.list}
+              onClose={closeOverlay}
+              onRename={() =>
+                setActiveOverlay({ kind: "rename", list: activeOverlay.list })
+              }
+              onDelete={() => confirmDelete(activeOverlay.list)}
+            />
+          )}
+          {activeOverlay?.kind === "rename" && (
+            <UpdateListForm
+              key={activeOverlay.list.id}
+              list={activeOverlay.list}
+              onClose={closeOverlay}
+            />
+          )}
         </View>
       </Modal>
     </View>

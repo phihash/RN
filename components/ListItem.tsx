@@ -1,38 +1,27 @@
 import { Pressable, Text, View, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { SavedList } from "../storage/list";
-import { useState } from "react";
-import ListItemMenu from "./ListItemMenu";
 
 type ListItemProps = {
   item: SavedList;
+  onMenuPress: (item: SavedList) => void;
 };
 
-export default function ListItem({ item }: ListItemProps) {
-  const [menuVisible, setMenuVisible] = useState(false);
-
+export default function ListItem({ item, onMenuPress }: ListItemProps) {
   return (
-    <>
-      <View style={styles.listCard}>
-        <Text style={styles.listName} numberOfLines={2}>
-          {item.name}
-        </Text>
-        <Pressable
-          style={styles.menuButton}
-          onPress={() => setMenuVisible(true)}
-          accessibilityRole="button"
-          accessibilityLabel={`${item.name}のメニューを開く`}
-        >
-          <Ionicons name="ellipsis-horizontal" size={22} color="#4a90d9" />
-        </Pressable>
-      </View>
-
-      <ListItemMenu
-        visible={menuVisible}
-        listName={item.name}
-        onClose={() => setMenuVisible(false)}
-      />
-    </>
+    <View style={styles.listCard}>
+      <Text style={styles.listName} numberOfLines={2}>
+        {item.name}
+      </Text>
+      <Pressable
+        style={styles.menuButton}
+        onPress={() => onMenuPress(item)}
+        accessibilityRole="button"
+        accessibilityLabel={`${item.name}のメニューを開く`}
+      >
+        <Ionicons name="ellipsis-horizontal" size={22} color="#4a90d9" />
+      </Pressable>
+    </View>
   );
 }
 

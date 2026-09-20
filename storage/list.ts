@@ -24,6 +24,19 @@ export async function createList(name: string): Promise<number> {
   return result.lastInsertRowId;
 }
 
+export async function updateListName(
+  id: number,
+  newName: string,
+): Promise<boolean> {
+  const db = await dbPromise;
+  const result = await db.runAsync(
+    `UPDATE lists SET name = ? WHERE id = ?`,
+    newName.trim(),
+    id,
+  );
+  return result.changes > 0;
+}
+
 export async function deleteList(id: number): Promise<boolean> {
   const db = await dbPromise;
   const result = await db.runAsync(`DELETE FROM lists WHERE id = ?`, id);
