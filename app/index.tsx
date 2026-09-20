@@ -6,9 +6,11 @@ import ListNameLabel from "../components/ListNameLabel";
 import { defaultItems } from "../data";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ListForm from "../components/ListForm";
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>(defaultItems);
+  const [showForm, setShowForm] = useState<boolean>(false);
   const insets = useSafeAreaInsets();
   return (
     <View style={styles.container}>
@@ -42,17 +44,26 @@ export default function Home() {
           </Pressable>
         )}
       />
-      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+      <View
+        style={[
+          styles.bottomBar,
+          { paddingBottom: Math.max(insets.bottom, 16) },
+        ]}
+      >
         <Pressable
           accessibilityRole="button"
           onPress={() => {
-            router.push("/menu");
+            setShowForm(true);
           }}
-          style={({ pressed }) => [styles.menuButton, pressed && styles.menuButtonPressed]}
+          style={({ pressed }) => [
+            styles.menuButton,
+            pressed && styles.menuButtonPressed,
+          ]}
         >
-          <Text style={styles.menuButtonText}>メニュー</Text>
+          <Text style={styles.menuButtonText}>リスト作成</Text>
         </Pressable>
       </View>
+      {showForm && <ListForm />}
     </View>
   );
 }
