@@ -15,9 +15,19 @@ export async function getLists(): Promise<SavedList[]> {
   return db.getAllAsync<SavedList>("SELECT * FROM lists");
 }
 
-export async function createList(name: string): Promise<void> {
+export async function createList(name: string): Promise<number> {
   const db = await dbPromise;
-  await db.runAsync(`INSERT INTO lists (name) VALUES (?)`, name.trim());
+  const result = await db.runAsync(
+    `INSERT INTO lists (name) VALUES (?)`,
+    name.trim(),
+  );
+  return result.lastInsertRowId;
+}
+
+export async function deleteList(id: number): Promise<boolean> {
+  const db = await dbPromise;
+  const result = await db.runAsync(`DELETE FROM lists WHERE id = ?`, id);
+  return result.changes > 0;
 }
 
 export async function addItem(listId: number, addItem: string): Promise<void> {
