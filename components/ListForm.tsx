@@ -1,6 +1,8 @@
 import { StyleSheet, Text, View, TextInput, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { createList } from "../storage/list";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
 type ListFormProps = {
   onClose: () => void;
@@ -10,11 +12,16 @@ export default function ListForm({ onClose }: ListFormProps) {
   const router = useRouter();
   const [listName, setListName] = useState<string>("");
   const canSubmit = listName.trim().length > 0;
+  const queryClient = useQueryClient();
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>新しいリスト</Text>
-        <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="閉じる">
+        <Pressable
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="閉じる"
+        >
           <Text style={styles.closeText}>閉じる</Text>
         </Pressable>
       </View>
@@ -35,10 +42,13 @@ export default function ListForm({ onClose }: ListFormProps) {
           !canSubmit && styles.buttonDisabled,
           pressed && styles.buttonPressed,
         ]}
-        onPress={() => {
+        onPress={async () => {
           if (canSubmit) {
-            onClose();
+            await createList(listName);
+
             router.push("/item-catalog");
+            onClose();
+            await queryClient.invalidateQueries({ queryKey: ["lists"] });
           }
         }}
       >

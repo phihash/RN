@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ListForm from "../components/ListForm";
+import ListItem from "../components/ListItem";
 import { getLists } from "../storage/list";
 
 export default function Home() {
@@ -24,10 +25,13 @@ export default function Home() {
         ) : (
           <FlatList
             style={styles.list}
-            contentContainerStyle={lists.length === 0 ? styles.emptyList : undefined}
+            contentContainerStyle={[
+              styles.listContent,
+              lists.length === 0 && styles.emptyList,
+            ]}
             data={lists}
             keyExtractor={(item) => String(item.id)}
-            renderItem={({ item }) => <Text style={styles.listName}>{item.name}</Text>}
+            renderItem={({ item }) => <ListItem item={item} />}
             ListEmptyComponent={<Text style={styles.emptyText}>リストはありません</Text>}
           />
         )}
@@ -80,16 +84,15 @@ const styles = StyleSheet.create({
   },
   list: {
     flex: 1,
+  },
+  listContent: {
     paddingHorizontal: 16,
+    paddingVertical: 16,
+    gap: 12,
   },
   emptyList: {
     flexGrow: 1,
     justifyContent: "center",
-  },
-  listName: {
-    paddingVertical: 16,
-    fontSize: 18,
-    color: "#263f4d",
   },
   emptyText: {
     textAlign: "center",

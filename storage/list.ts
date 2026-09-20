@@ -14,3 +14,17 @@ export async function getLists(): Promise<SavedList[]> {
   );
   return db.getAllAsync<SavedList>("SELECT * FROM lists");
 }
+
+export async function createList(name: string): Promise<void> {
+  const db = await dbPromise;
+  await db.runAsync(`INSERT INTO lists (name) VALUES (?)`, name.trim());
+}
+
+export async function addItem(listId: number, addItem: string): Promise<void> {
+  const db = await dbPromise;
+  await db.runAsync(
+    `INSERT INTO items (list_id, name) VALUES (?, ?)`,
+    listId,
+    addItem,
+  );
+}
