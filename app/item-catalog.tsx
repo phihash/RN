@@ -10,11 +10,9 @@ import ItemRow from "../components/ItemRow";
 import { defaultItems } from "../data";
 import { useState } from "react";
 import { CATEGORIES, Category } from "../types";
-import { useRouter } from "expo-router";
 
-export default function Menu() {
+export default function ItemCatalog() {
   const [selectTab, setSelectTab] = useState<Category>("貴重品");
-  const router = useRouter();
   return (
     <View style={styles.container}>
       <ScrollView

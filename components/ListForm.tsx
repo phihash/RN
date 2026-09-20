@@ -38,7 +38,7 @@ export default function ListForm({ onClose }: ListFormProps) {
         onPress={() => {
           if (canSubmit) {
             onClose();
-            router.push("/menu");
+            router.push("/item-catalog");
           }
         }}
       >

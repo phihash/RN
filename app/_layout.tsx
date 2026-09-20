@@ -12,8 +12,9 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerStyle: {
-            backgroundColor: "#f4511e",
+            backgroundColor: "#4a90d9",
           },
+          headerTintColor: "#fff",
         }}
       >
         <Stack.Screen
@@ -23,16 +24,16 @@ export default function RootLayout() {
             headerRight: () => (
               <>
                 <Link href="/settings">
-                  <Ionicons name="settings-outline" size={24} color="#4a90d9" />
+                  <Ionicons name="settings-outline" size={24} color="#fff" />
                 </Link>
               </>
             ),
           }}
         />
         <Stack.Screen
-          name="menu"
+          name="item-catalog"
           options={{
-            title: "メニュー",
+            title: "持ち物一覧",
             presentation: "fullScreenModal",
             headerRight: () => (
               <>
@@ -41,7 +42,7 @@ export default function RootLayout() {
                     router.dismiss();
                   }}
                 >
-                  <Text>閉じる</Text>
+                  <Text style={{ color: "#fff" }}>閉じる</Text>
                 </Pressable>
               </>
             ),
