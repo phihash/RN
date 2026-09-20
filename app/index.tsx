@@ -1,20 +1,36 @@
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import { Item } from "../types";
+import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { useState } from "react";
-import { defaultItems } from "../data";
-import { router } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ListForm from "../components/ListForm";
-import { getLists, SavedList } from "../storage/list";
+import { getLists } from "../storage/list";
 
 export default function Home() {
-  const [lists, setLists] = useState<SavedList[]>([]);
+  const { data: lists = [], isPending, isError } = useQuery({
+    queryKey: ["lists"],
+    queryFn: getLists,
+    retry: false,
+  });
   const [showForm, setShowForm] = useState<boolean>(false);
   const insets = useSafeAreaInsets();
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text>リストはありません</Text>
+        {isPending ? (
+          <ActivityIndicator color="#4a90d9" />
+        ) : isError ? (
+          <Text>リストを読み込めませんでした</Text>
+        ) : (
+          <FlatList
+            style={styles.list}
+            contentContainerStyle={lists.length === 0 ? styles.emptyList : undefined}
+            data={lists}
+            keyExtractor={(item) => String(item.id)}
+            renderItem={({ item }) => <Text style={styles.listName}>{item.name}</Text>}
+            ListEmptyComponent={<Text style={styles.emptyText}>リストはありません</Text>}
+          />
+        )}
       </View>
       <View
         style={[
@@ -61,8 +77,23 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    alignItems: "center",
+  },
+  list: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  emptyList: {
+    flexGrow: 1,
     justifyContent: "center",
+  },
+  listName: {
+    paddingVertical: 16,
+    fontSize: 18,
+    color: "#263f4d",
+  },
+  emptyText: {
+    textAlign: "center",
+    color: "#5a7684",
   },
   title: {
     fontSize: 24,
@@ -74,11 +105,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 8,
     marginBottom: 8,
-  },
-  list: {
-    flex: 1,
-    alignSelf: "stretch",
-    marginHorizontal: 16,
   },
   listitem: { flexDirection: "row", gap: 8 },
   bottomBar: {
