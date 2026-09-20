@@ -5,8 +5,10 @@ import { defaultItems } from "../data";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ListForm from "../components/ListForm";
+import { getLists, SavedList } from "../storage/list";
 
 export default function Home() {
+  const [lists, setLists] = useState<SavedList[]>([]);
   const [showForm, setShowForm] = useState<boolean>(false);
   const insets = useSafeAreaInsets();
   return (
