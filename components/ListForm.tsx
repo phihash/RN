@@ -2,13 +2,22 @@ import { StyleSheet, Text, View, TextInput, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 
-export default function ListForm() {
+type ListFormProps = {
+  onClose: () => void;
+};
+
+export default function ListForm({ onClose }: ListFormProps) {
   const router = useRouter();
   const [listName, setListName] = useState<string>("");
   const canSubmit = listName.trim().length > 0;
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>新しいリスト</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>新しいリスト</Text>
+        <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="閉じる">
+          <Text style={styles.closeText}>閉じる</Text>
+        </Pressable>
+      </View>
       <Text style={styles.label}>リスト名</Text>
       <TextInput
         style={styles.input}
@@ -28,6 +37,7 @@ export default function ListForm() {
         ]}
         onPress={() => {
           if (canSubmit) {
+            onClose();
             router.push("/menu");
           }
         }}
@@ -40,15 +50,33 @@ export default function ListForm() {
 
 const styles = StyleSheet.create({
   container: {
+    width: "100%",
+    maxWidth: 400,
     padding: 20,
     gap: 12,
     backgroundColor: "#fff",
+    borderRadius: 18,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   title: {
     fontSize: 22,
     fontWeight: "700",
     color: "#263f4d",
     marginBottom: 4,
+  },
+  closeText: {
+    fontSize: 14,
+    color: "#5a7684",
+    padding: 4,
   },
   label: {
     fontSize: 14,

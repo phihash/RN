@@ -1,49 +1,19 @@
-import { Pressable, StyleSheet, Text, View, FlatList } from "react-native";
+import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { Item } from "../types";
 import { useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
-import ListNameLabel from "../components/ListNameLabel";
 import { defaultItems } from "../data";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ListForm from "../components/ListForm";
 
 export default function Home() {
-  const [items, setItems] = useState<Item[]>(defaultItems);
   const [showForm, setShowForm] = useState<boolean>(false);
   const insets = useSafeAreaInsets();
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>最初の画面</Text>
-      <Text style={styles.description}>右上の⚙をタップすると設定画面へ</Text>
-      <FlatList
-        style={styles.list}
-        data={items}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Pressable
-            style={styles.listitem}
-            onPress={() => {
-              setItems(
-                items.map((element) =>
-                  element.id === item.id
-                    ? { ...element, checked: !element.checked }
-                    : element,
-                ),
-              );
-            }}
-          >
-            <Text>
-              {item.checked ? "✅" : "⬜️"}
-              {item.name}{" "}
-              {item.icon && (
-                <Ionicons name={item.icon} size={20} color="#555" />
-              )}
-            </Text>
-            <ListNameLabel />
-          </Pressable>
-        )}
-      />
+      <View style={styles.content}>
+        <Text>リストはありません</Text>
+      </View>
       <View
         style={[
           styles.bottomBar,
@@ -63,7 +33,21 @@ export default function Home() {
           <Text style={styles.menuButtonText}>リスト作成</Text>
         </Pressable>
       </View>
-      {showForm && <ListForm />}
+      <Modal
+        visible={showForm}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowForm(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={() => setShowForm(false)}
+            accessibilityLabel="フォームを閉じる"
+          />
+          <ListForm onClose={() => setShowForm(false)} />
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -72,6 +56,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  content: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     fontSize: 24,
@@ -94,8 +83,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
     backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderTopColor: "#dbe4ea",
   },
   menuButton: {
     minHeight: 52,
@@ -111,5 +98,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+    backgroundColor: "rgba(19, 35, 47, 0.45)",
   },
 });
