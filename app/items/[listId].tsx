@@ -3,6 +3,7 @@ import { Stack, useLocalSearchParams } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { getItems, getList } from "../../storage/list";
 import ItemRow from "../../components/ItemRow";
+import { defaultItems } from "../../data";
 
 export default function Items() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
@@ -28,8 +29,20 @@ export default function Items() {
           style={styles.list}
           data={items}
           keyExtractor={(item) => String(item.id)}
-          contentContainerStyle={styles.grid}
-          renderItem={({ item }) => <ItemRow name={item.name} />}
+          contentContainerStyle={[
+            styles.grid,
+            items.length === 0 && styles.emptyList,
+          ]}
+          renderItem={({ item }) => (
+            <ItemRow
+              name={item.name}
+              icon={
+                item.icon ??
+                defaultItems.find((catalogItem) => catalogItem.name === item.name)
+                  ?.icon
+              }
+            />
+          )}
           ListEmptyComponent={
             <Text style={styles.emptyText}>アイテムはありません</Text>
           }
@@ -42,8 +55,6 @@ export default function Items() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     backgroundColor: "#fff",
   },
   list: {

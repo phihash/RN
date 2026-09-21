@@ -66,7 +66,11 @@ export default function ItemCatalog() {
             icon={item.icon}
             onPress={async () => {
               try {
-                const result = await addItem(numericListId, item.name);
+                const result = await addItem(
+                  numericListId,
+                  item.name,
+                  item.icon,
+                );
 
                 if (!result) {
                   Alert.alert("アイテムの追加に失敗しました");

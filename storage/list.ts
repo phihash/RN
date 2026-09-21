@@ -1,4 +1,5 @@
 import * as SQLite from "expo-sqlite";
+import type { IconName } from "../types";
 
 export type SavedList = {
   id: number;
@@ -9,6 +10,7 @@ export type SavedItem = {
   id: number;
   list_id: number;
   name: string;
+  icon: IconName | null;
 };
 
 const dbPromise = SQLite.openDatabaseAsync("checklists.db");
@@ -26,6 +28,7 @@ async function prepareItemsTable(db: SQLite.SQLiteDatabase): Promise<void> {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       list_id INTEGER NOT NULL,
       name TEXT NOT NULL,
+      icon TEXT,
       FOREIGN KEY (list_id) REFERENCES lists(id)
     )
   `);
@@ -35,9 +38,14 @@ async function prepareItemsTable(db: SQLite.SQLiteDatabase): Promise<void> {
   );
   const hasLegacyListId = columns.some((column) => column.name === "listId");
   const hasListId = columns.some((column) => column.name === "list_id");
+  const hasIcon = columns.some((column) => column.name === "icon");
 
   if (hasLegacyListId && !hasListId) {
     await db.execAsync("ALTER TABLE items RENAME COLUMN listId TO list_id");
+  }
+
+  if (!hasIcon) {
+    await db.execAsync("ALTER TABLE items ADD COLUMN icon TEXT");
   }
 }
 
@@ -93,13 +101,15 @@ export async function deleteList(id: number): Promise<boolean> {
 export async function addItem(
   listId: number,
   itemName: string,
+  icon?: IconName,
 ): Promise<boolean> {
   const db = await dbPromise;
   await prepareItemsTable(db);
   const result = await db.runAsync(
-    `INSERT INTO items (list_id, name) VALUES (?, ?)`,
+    `INSERT INTO items (list_id, name, icon) VALUES (?, ?, ?)`,
     listId,
     itemName,
+    icon ?? null,
   );
   return result.changes > 0;
 }
