@@ -5,14 +5,21 @@ import {
   Text,
   Pressable,
   ScrollView,
+  Alert,
 } from "react-native";
 import ItemRow from "../components/ItemRow";
 import { defaultItems } from "../data";
 import { useState } from "react";
 import { CATEGORIES, Category } from "../types";
+import { useLocalSearchParams } from "expo-router";
+import { addItem } from "../storage/list";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ItemCatalog() {
   const [selectTab, setSelectTab] = useState<Category>("貴重品");
+  const { listId } = useLocalSearchParams<{ listId: string }>();
+  const numericListId = Number(listId);
+  const queryClient = useQueryClient();
   return (
     <View style={styles.container}>
       <ScrollView
@@ -53,7 +60,29 @@ export default function ItemCatalog() {
         })}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.grid}
-        renderItem={({ item }) => <ItemRow name={item.name} icon={item.icon} />}
+        renderItem={({ item }) => (
+          <ItemRow
+            name={item.name}
+            icon={item.icon}
+            onPress={async () => {
+              try {
+                const result = await addItem(numericListId, item.name);
+
+                if (!result) {
+                  Alert.alert("アイテムの追加に失敗しました");
+                  return;
+                }
+
+                await queryClient.invalidateQueries({
+                  queryKey: ["items", numericListId],
+                });
+              } catch (error) {
+                console.error("アイテムの追加に失敗しました", error);
+                Alert.alert("アイテムの追加に失敗しました");
+              }
+            }}
+          />
+        )}
       />
     </View>
   );

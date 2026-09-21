@@ -44,9 +44,14 @@ export default function ListForm({ onClose }: ListFormProps) {
         ]}
         onPress={async () => {
           if (canSubmit) {
-            await createList(listName);
+            const listId = await createList(listName);
 
-            router.push("/item-catalog");
+            router.push({
+              pathname: "/item-catalog",
+              params: {
+                listId: String(listId),
+              },
+            });
             onClose();
             await queryClient.invalidateQueries({ queryKey: ["lists"] });
           }

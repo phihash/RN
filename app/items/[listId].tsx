@@ -1,21 +1,28 @@
 import { StyleSheet, Text, View, FlatList } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { getItems } from "../../storage/list";
+import { getItems, getList } from "../../storage/list";
 import ItemRow from "../../components/ItemRow";
 
 export default function Items() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
   const numericListId = Number(listId);
+  const isValidListId = Number.isInteger(numericListId);
+
+  const { data: list } = useQuery({
+    queryKey: ["lists", numericListId],
+    queryFn: () => getList(numericListId),
+    enabled: isValidListId,
+  });
 
   const { data: items = [] } = useQuery({
     queryKey: ["items", numericListId],
     queryFn: () => getItems(numericListId),
-    enabled: Number.isInteger(numericListId),
+    enabled: isValidListId,
   });
   return (
     <>
-      <Stack.Screen options={{ title: `リスト ${listId}` }} />
+      <Stack.Screen options={{ title: list?.name ?? "アイテム" }} />
       <View style={styles.container}>
         <FlatList
           style={styles.list}

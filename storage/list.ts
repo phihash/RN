@@ -13,7 +13,14 @@ export type SavedItem = {
 
 const dbPromise = SQLite.openDatabaseAsync("checklists.db");
 
+async function prepareListsTable(db: SQLite.SQLiteDatabase): Promise<void> {
+  await db.execAsync(
+    `CREATE TABLE IF NOT EXISTS lists (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL)`,
+  );
+}
+
 async function prepareItemsTable(db: SQLite.SQLiteDatabase): Promise<void> {
+  await prepareListsTable(db);
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,10 +43,14 @@ async function prepareItemsTable(db: SQLite.SQLiteDatabase): Promise<void> {
 
 export async function getLists(): Promise<SavedList[]> {
   const db = await dbPromise;
-  await db.execAsync(
-    `CREATE TABLE IF NOT EXISTS lists  (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL)`,
-  );
+  await prepareListsTable(db);
   return db.getAllAsync<SavedList>("SELECT * FROM lists");
+}
+
+export async function getList(id: number): Promise<SavedList | null> {
+  const db = await dbPromise;
+  await prepareListsTable(db);
+  return db.getFirstAsync<SavedList>("SELECT * FROM lists WHERE id = ?", id);
 }
 
 export async function getItems(listId: number): Promise<SavedItem[]> {
@@ -79,12 +90,16 @@ export async function deleteList(id: number): Promise<boolean> {
   return result.changes > 0;
 }
 
-export async function addItem(listId: number, itemName: string): Promise<void> {
+export async function addItem(
+  listId: number,
+  itemName: string,
+): Promise<boolean> {
   const db = await dbPromise;
   await prepareItemsTable(db);
-  await db.runAsync(
+  const result = await db.runAsync(
     `INSERT INTO items (list_id, name) VALUES (?, ?)`,
     listId,
     itemName,
   );
+  return result.changes > 0;
 }
