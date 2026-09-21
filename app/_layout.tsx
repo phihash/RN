@@ -49,7 +49,6 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen name="settings" options={{ title: "設定" }} />
-        <Stack.Screen name="items/[listId]" />
       </Stack>
     </QueryClientProvider>
   );

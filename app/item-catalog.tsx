@@ -12,14 +12,20 @@ import { defaultItems } from "../data";
 import { useState } from "react";
 import { CATEGORIES, Category } from "../types";
 import { useLocalSearchParams } from "expo-router";
-import { addItem } from "../storage/list";
-import { useQueryClient } from "@tanstack/react-query";
+import { getItems, toggleItem } from "../storage/list";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function ItemCatalog() {
   const [selectTab, setSelectTab] = useState<Category>("貴重品");
   const { listId } = useLocalSearchParams<{ listId: string }>();
   const numericListId = Number(listId);
+  const isValidListId = Number.isInteger(numericListId);
   const queryClient = useQueryClient();
+  const { data: savedItems = [] } = useQuery({
+    queryKey: ["items", numericListId],
+    queryFn: () => getItems(numericListId),
+    enabled: isValidListId,
+  });
   return (
     <View style={styles.container}>
       <ScrollView
@@ -64,25 +70,24 @@ export default function ItemCatalog() {
           <ItemRow
             name={item.name}
             icon={item.icon}
+            selected={savedItems.some(
+              (savedItem) => savedItem.catalog_item_id === item.id,
+            )}
             onPress={async () => {
               try {
-                const result = await addItem(
+                await toggleItem(
                   numericListId,
+                  item.id,
                   item.name,
                   item.icon,
                 );
-
-                if (!result) {
-                  Alert.alert("アイテムの追加に失敗しました");
-                  return;
-                }
 
                 await queryClient.invalidateQueries({
                   queryKey: ["items", numericListId],
                 });
               } catch (error) {
-                console.error("アイテムの追加に失敗しました", error);
-                Alert.alert("アイテムの追加に失敗しました");
+                console.error("アイテムの更新に失敗しました", error);
+                Alert.alert("アイテムを更新できませんでした");
               }
             }}
           />

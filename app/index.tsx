@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 import { useState } from "react";
+import { useRouter } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ListForm from "../components/ListForm";
@@ -25,6 +26,7 @@ type ActiveOverlay =
   | null;
 
 export default function Home() {
+  const router = useRouter();
   const {
     data: lists = [],
     isPending,
@@ -137,6 +139,14 @@ export default function Home() {
               onRename={() =>
                 setActiveOverlay({ kind: "rename", list: activeOverlay.list })
               }
+              onAddItems={() => {
+                const listId = activeOverlay.list.id;
+                closeOverlay();
+                router.push({
+                  pathname: "/item-catalog",
+                  params: { listId: String(listId) },
+                });
+              }}
               onDelete={() => confirmDelete(activeOverlay.list)}
             />
           )}

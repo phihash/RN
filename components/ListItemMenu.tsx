@@ -6,6 +6,7 @@ type ListItemMenuProps = {
   listItem: SavedList;
   onClose: () => void;
   onRename: () => void;
+  onAddItems: () => void;
   onDelete: () => void;
 };
 
@@ -13,6 +14,7 @@ export default function ListItemMenu({
   listItem,
   onClose,
   onRename,
+  onAddItems,
   onDelete,
 }: ListItemMenuProps) {
   return (
@@ -27,10 +29,12 @@ export default function ListItemMenu({
         </View>
       </Pressable>
 
-      <View style={styles.menuOption}>
-        <Ionicons name="add-circle-outline" size={22} color="#4a90d9" />
-        <Text style={styles.menuOptionText}>リストにアイテムを追加する</Text>
-      </View>
+      <Pressable accessibilityRole="button" onPress={onAddItems}>
+        <View style={styles.menuOption}>
+          <Ionicons name="add-circle-outline" size={22} color="#4a90d9" />
+          <Text style={styles.menuOptionText}>リストにアイテムを追加する</Text>
+        </View>
+      </Pressable>
       <Pressable accessibilityRole="button" onPress={onDelete}>
         <View style={styles.menuOption}>
           <Ionicons name="trash-outline" size={22} color="#c54b4b" />

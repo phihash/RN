@@ -9,16 +9,23 @@ export type SavedList = {
 export type SavedItem = {
   id: number;
   list_id: number;
+  catalog_item_id: string;
   name: string;
   icon: IconName | null;
+  checked: 0 | 1;
 };
 
-const dbPromise = SQLite.openDatabaseAsync("checklists.db");
+const dbPromise = SQLite.openDatabaseAsync("checklists-v2.db");
 
 async function prepareListsTable(db: SQLite.SQLiteDatabase): Promise<void> {
-  await db.execAsync(
-    `CREATE TABLE IF NOT EXISTS lists (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL)`,
-  );
+  await db.execAsync(`
+    PRAGMA foreign_keys = ON;
+
+    CREATE TABLE IF NOT EXISTS lists (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL
+    );
+  `);
 }
 
 async function prepareItemsTable(db: SQLite.SQLiteDatabase): Promise<void> {
@@ -27,26 +34,14 @@ async function prepareItemsTable(db: SQLite.SQLiteDatabase): Promise<void> {
     CREATE TABLE IF NOT EXISTS items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       list_id INTEGER NOT NULL,
+      catalog_item_id TEXT NOT NULL,
       name TEXT NOT NULL,
       icon TEXT,
-      FOREIGN KEY (list_id) REFERENCES lists(id)
-    )
+      checked INTEGER NOT NULL DEFAULT 0,
+      UNIQUE (list_id, catalog_item_id),
+      FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE
+    );
   `);
-
-  const columns = await db.getAllAsync<{ name: string }>(
-    "PRAGMA table_info(items)",
-  );
-  const hasLegacyListId = columns.some((column) => column.name === "listId");
-  const hasListId = columns.some((column) => column.name === "list_id");
-  const hasIcon = columns.some((column) => column.name === "icon");
-
-  if (hasLegacyListId && !hasListId) {
-    await db.execAsync("ALTER TABLE items RENAME COLUMN listId TO list_id");
-  }
-
-  if (!hasIcon) {
-    await db.execAsync("ALTER TABLE items ADD COLUMN icon TEXT");
-  }
 }
 
 export async function getLists(): Promise<SavedList[]> {
@@ -72,6 +67,7 @@ export async function getItems(listId: number): Promise<SavedItem[]> {
 
 export async function createList(name: string): Promise<number> {
   const db = await dbPromise;
+  await prepareListsTable(db);
   const result = await db.runAsync(
     `INSERT INTO lists (name) VALUES (?)`,
     name.trim(),
@@ -84,6 +80,7 @@ export async function updateListName(
   newName: string,
 ): Promise<boolean> {
   const db = await dbPromise;
+  await prepareListsTable(db);
   const result = await db.runAsync(
     `UPDATE lists SET name = ? WHERE id = ?`,
     newName.trim(),
@@ -94,22 +91,51 @@ export async function updateListName(
 
 export async function deleteList(id: number): Promise<boolean> {
   const db = await dbPromise;
+  await prepareListsTable(db);
   const result = await db.runAsync(`DELETE FROM lists WHERE id = ?`, id);
   return result.changes > 0;
 }
 
-export async function addItem(
+export async function toggleItem(
   listId: number,
+  catalogItemId: string,
   itemName: string,
   icon?: IconName,
-): Promise<boolean> {
+): Promise<"added" | "removed"> {
+  const db = await dbPromise;
+  await prepareItemsTable(db);
+
+  const deleted = await db.runAsync(
+    `DELETE FROM items
+     WHERE list_id = ? AND catalog_item_id = ?`,
+    listId,
+    catalogItemId,
+  );
+
+  if (deleted.changes > 0) {
+    return "removed";
+  }
+
+  await db.runAsync(
+    `INSERT INTO items
+      (list_id, catalog_item_id, name, icon)
+     VALUES (?, ?, ?, ?)`,
+    listId,
+    catalogItemId,
+    itemName,
+    icon ?? null,
+  );
+  return "added";
+}
+
+export async function toggleItemChecked(itemId: number): Promise<boolean> {
   const db = await dbPromise;
   await prepareItemsTable(db);
   const result = await db.runAsync(
-    `INSERT INTO items (list_id, name, icon) VALUES (?, ?, ?)`,
-    listId,
-    itemName,
-    icon ?? null,
+    `UPDATE items
+     SET checked = CASE checked WHEN 0 THEN 1 ELSE 0 END
+     WHERE id = ?`,
+    itemId,
   );
   return result.changes > 0;
 }
