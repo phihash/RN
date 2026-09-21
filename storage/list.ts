@@ -5,7 +5,34 @@ export type SavedList = {
   name: string;
 };
 
+export type SavedItem = {
+  id: number;
+  list_id: number;
+  name: string;
+};
+
 const dbPromise = SQLite.openDatabaseAsync("checklists.db");
+
+async function prepareItemsTable(db: SQLite.SQLiteDatabase): Promise<void> {
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      list_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      FOREIGN KEY (list_id) REFERENCES lists(id)
+    )
+  `);
+
+  const columns = await db.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(items)",
+  );
+  const hasLegacyListId = columns.some((column) => column.name === "listId");
+  const hasListId = columns.some((column) => column.name === "list_id");
+
+  if (hasLegacyListId && !hasListId) {
+    await db.execAsync("ALTER TABLE items RENAME COLUMN listId TO list_id");
+  }
+}
 
 export async function getLists(): Promise<SavedList[]> {
   const db = await dbPromise;
@@ -15,12 +42,13 @@ export async function getLists(): Promise<SavedList[]> {
   return db.getAllAsync<SavedList>("SELECT * FROM lists");
 }
 
-export async function getItems(listId: number) {
+export async function getItems(listId: number): Promise<SavedItem[]> {
   const db = await dbPromise;
-  await db.execAsync(
-    `CREATE TABLE IF NOT EXISTS items(id INTEGER PRIMARY KEY AUTOINCREMENT, listId INTEGER NOT NULL , name TEXT NOT NULL, FOREIGN KEY(listId) REFERENCES lists(id))`,
+  await prepareItemsTable(db);
+  return db.getAllAsync<SavedItem>(
+    "SELECT * FROM items WHERE list_id = ?",
+    listId,
   );
-  return db.getAllAsync(`SELECT * FROM items WHERE listId = ?`, listId);
 }
 
 export async function createList(name: string): Promise<number> {
@@ -51,11 +79,12 @@ export async function deleteList(id: number): Promise<boolean> {
   return result.changes > 0;
 }
 
-export async function addItem(listId: number, addItem: string): Promise<void> {
+export async function addItem(listId: number, itemName: string): Promise<void> {
   const db = await dbPromise;
+  await prepareItemsTable(db);
   await db.runAsync(
     `INSERT INTO items (list_id, name) VALUES (?, ?)`,
     listId,
-    addItem,
+    itemName,
   );
 }

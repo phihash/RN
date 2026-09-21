@@ -27,9 +27,7 @@ export default function ListItem({ item, onMenuPress }: ListItemProps) {
         accessibilityRole="button"
         accessibilityLabel={`${item.name}を開く`}
       >
-        <Text style={styles.listName} numberOfLines={2}>
-          {item.name}
-        </Text>
+        <Text style={styles.listName}>{item.name}</Text>
       </Pressable>
       <Pressable
         style={({ pressed }) => [
