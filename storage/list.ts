@@ -15,6 +15,14 @@ export async function getLists(): Promise<SavedList[]> {
   return db.getAllAsync<SavedList>("SELECT * FROM lists");
 }
 
+export async function getItems(listId: number) {
+  const db = await dbPromise;
+  await db.execAsync(
+    `CREATE TABLE IF NOT EXISTS items(id INTEGER PRIMARY KEY AUTOINCREMENT, listId INTEGER NOT NULL , name TEXT NOT NULL, FOREIGN KEY(listId) REFERENCES lists(id))`,
+  );
+  return db.getAllAsync(`SELECT * FROM items WHERE listId = ?`, listId);
+}
+
 export async function createList(name: string): Promise<number> {
   const db = await dbPromise;
   const result = await db.runAsync(
