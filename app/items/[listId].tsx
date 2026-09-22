@@ -9,7 +9,11 @@ import {
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getItems, getList, toggleItemChecked } from "../../storage/list";
+import {
+  getListItems,
+  getList,
+  toggleListItemChecked,
+} from "../../storage/list";
 import ItemRow from "../../components/ItemRow";
 import { defaultItems } from "../../data";
 
@@ -26,8 +30,8 @@ export default function Items() {
   });
 
   const { data: items = [] } = useQuery({
-    queryKey: ["items", numericListId],
-    queryFn: () => getItems(numericListId),
+    queryKey: ["list-items", numericListId],
+    queryFn: () => getListItems(numericListId),
     enabled: isValidListId,
   });
   return (
@@ -74,13 +78,13 @@ export default function Items() {
               }
               onPress={async () => {
                 try {
-                  const updated = await toggleItemChecked(item.id);
+                  const updated = await toggleListItemChecked(item.id);
                   if (!updated) {
                     Alert.alert("アイテムが見つかりませんでした");
                     return;
                   }
                   await queryClient.invalidateQueries({
-                    queryKey: ["items", numericListId],
+                    queryKey: ["list-items", numericListId],
                   });
                 } catch (error) {
                   console.error("チェック状態の更新に失敗しました", error);

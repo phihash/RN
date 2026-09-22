@@ -12,7 +12,7 @@ import { defaultItems } from "../data";
 import { useState } from "react";
 import { CATEGORIES, Category } from "../types";
 import { useLocalSearchParams } from "expo-router";
-import { getItems, toggleItem } from "../storage/list";
+import { getListItems, toggleListItem } from "../storage/list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function ItemCatalog() {
@@ -21,9 +21,9 @@ export default function ItemCatalog() {
   const numericListId = Number(listId);
   const isValidListId = Number.isInteger(numericListId);
   const queryClient = useQueryClient();
-  const { data: savedItems = [] } = useQuery({
-    queryKey: ["items", numericListId],
-    queryFn: () => getItems(numericListId),
+  const { data: savedListItems = [] } = useQuery({
+    queryKey: ["list-items", numericListId],
+    queryFn: () => getListItems(numericListId),
     enabled: isValidListId,
   });
   return (
@@ -70,12 +70,12 @@ export default function ItemCatalog() {
           <ItemRow
             name={item.name}
             icon={item.icon}
-            selected={savedItems.some(
-              (savedItem) => savedItem.catalog_item_id === item.id,
+            selected={savedListItems.some(
+              (savedItem) => savedItem.item_key === item.id,
             )}
             onPress={async () => {
               try {
-                await toggleItem(
+                await toggleListItem(
                   numericListId,
                   item.id,
                   item.name,
@@ -83,7 +83,7 @@ export default function ItemCatalog() {
                 );
 
                 await queryClient.invalidateQueries({
-                  queryKey: ["items", numericListId],
+                  queryKey: ["list-items", numericListId],
                 });
               } catch (error) {
                 console.error("アイテムの更新に失敗しました", error);
