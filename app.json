@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "コトノハメモ",
+    "slug": "kotonoha",
+    "scheme": "kotonoha",
+    "icon": "./assets/icon.png",
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "net.phihash.kotonoha"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "ios": {
+      "bundleIdentifier": "net.phihash.kotonoha",
+      "usesAppleSignIn": true
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#192543"
+        }
+      ],
+      "expo-secure-store",
+      "expo-apple-authentication"
+    ]
+  }
+}
