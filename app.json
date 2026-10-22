@@ -17,7 +17,12 @@
     },
     "ios": {
       "bundleIdentifier": "net.phihash.kotonoha",
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "buildNumber": "2",
+      "appleTeamId": "XVM4X7JGBU",
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "plugins": [
       [
@@ -31,6 +36,22 @@
       ],
       "expo-secure-store",
       "expo-apple-authentication"
-    ]
+    ],
+    "version": "1.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "d0676cf2-f2bc-4eb3-87f6-e513c5865e07"
+      }
+    },
+    "owner": "phihash",
+    "updates": {
+      "url": "https://u.expo.dev/d0676cf2-f2bc-4eb3-87f6-e513c5865e07",
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
   }
 }
