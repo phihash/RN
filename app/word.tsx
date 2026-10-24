@@ -2,22 +2,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { track } from "../storage/analytics";
 import { addMemo, deleteMemo, updateMemo, type Memo } from "../storage/memos";
 
-const KINDS = [
-  ["word", "言葉を書く", "book-outline"],
-  ["phrase", "言い回しを書く", "chatbubble-ellipses-outline"],
-] as const;
-
-// id があれば編集。新規はまず種類を選んでから、同じシートでフォームを出す
-export default function WordSheet() {
-  const params = useLocalSearchParams<{ id?: string }>();
+// 全画面の入力画面。id があれば編集、なければ kind で新規
+export default function WordScreen() {
+  const params = useLocalSearchParams<{ id?: string; kind?: string }>();
+  const { top, bottom } = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const memo = queryClient.getQueryData<Memo[]>(["memos"])?.find((m) => m.id === params.id);
-  const [picked, setPicked] = useState<Memo["kind"]>();
-  const kind = memo?.kind ?? picked ?? "word";
+  const kind = memo?.kind ?? (params.kind === "phrase" ? "phrase" : "word");
   const isWord = kind === "word";
   const [word, setWord] = useState(memo?.word ?? "");
   const [description, setDescription] = useState(memo?.description ?? "");
@@ -55,107 +51,107 @@ export default function WordSheet() {
       { text: "削除する", style: "destructive", onPress: () => memo && remove.mutate(memo.id) },
     ]);
 
-  if (!memo && !picked) {
-    return (
-      <View style={styles.menu}>
-        {KINDS.map(([value, label, icon]) => (
-          <Pressable key={value} style={styles.menuRow} onPress={() => setPicked(value)}>
-            <Ionicons name={icon} size={26} color="#192543" />
-            <Text style={styles.menuText}>{label}</Text>
-          </Pressable>
-        ))}
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView behavior="padding" style={[styles.container, { paddingTop: top + 8, paddingBottom: bottom }]}>
+      <View style={styles.header}>
+        <Pressable style={styles.close} onPress={() => router.back()} accessibilityLabel="閉じる">
+          <Ionicons name="close" size={26} color="#333" />
+        </Pressable>
+        <Text style={styles.title}>{memo ? "編集する" : isWord ? "言葉を書く" : "言い回しを書く"}</Text>
+        <Pressable
+          style={[styles.save, !canSave && styles.saveDisabled]}
+          onPress={onSave}
+          disabled={!canSave || save.isPending}
+        >
+          <Text style={[styles.saveText, !canSave && styles.saveTextDisabled]}>保存</Text>
+        </Pressable>
+      </View>
       {isWord && (
         <TextInput
-          style={[styles.input, styles.word]}
+          style={styles.word}
           value={word}
           onChangeText={setWord}
           placeholder="言葉"
+          placeholderTextColor="#aaa"
           autoFocus={!memo}
         />
       )}
       <TextInput
-        style={[styles.input, styles.multiline]}
+        style={styles.body}
         value={description}
         onChangeText={setDescription}
-        placeholder={isWord ? "説明" : "共感した言い回しや考え"}
+        placeholder={isWord ? "どういう意味？" : "共感した言い回しや考え"}
+        placeholderTextColor="#aaa"
         autoFocus={!memo && !isWord}
         multiline
       />
-      <Pressable
-        style={[styles.button, !canSave && styles.buttonDisabled]}
-        onPress={onSave}
-        disabled={!canSave || save.isPending}
-      >
-        <Text style={styles.buttonText}>保存</Text>
-      </Pressable>
       {memo && (
         <Pressable style={styles.delete} onPress={confirmDelete} disabled={remove.isPending}>
           <Text style={styles.deleteText}>削除</Text>
         </Pressable>
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  menu: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 40,
+  container: {
+    flex: 1,
+    paddingHorizontal: 20,
+    backgroundColor: "#fff",
   },
-  menuRow: {
+  header: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
-    paddingVertical: 16,
+    justifyContent: "space-between",
+    marginBottom: 16,
   },
-  menuText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#192543",
-  },
-  container: {
-    padding: 16,
-    paddingTop: 24,
-    gap: 12,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-  },
-  word: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#192543",
-  },
-  multiline: {
-    minHeight: 120,
-    textAlignVertical: "top",
-  },
-  button: {
-    height: 56,
-    marginTop: 8,
-    borderRadius: 12,
+  close: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
+    justifyContent: "center",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#ccc",
+  },
+  title: {
+    fontSize: 17,
+    fontWeight: "bold",
+    color: "#192543",
+  },
+  save: {
+    paddingHorizontal: 20,
+    height: 44,
+    borderRadius: 22,
     justifyContent: "center",
     backgroundColor: "#192543",
   },
-  buttonDisabled: {
-    opacity: 0.4,
+  saveDisabled: {
+    backgroundColor: "#f0f0f0",
   },
-  buttonText: {
-    color: "#F2E8D9",
-    fontSize: 17,
+  saveText: {
+    fontSize: 16,
     fontWeight: "bold",
+    color: "#F2E8D9",
+  },
+  saveTextDisabled: {
+    color: "#bbb",
+  },
+  word: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#192543",
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#ddd",
+  },
+  body: {
+    flex: 1,
+    fontSize: 17,
+    lineHeight: 26,
+    paddingTop: 12,
+    textAlignVertical: "top",
   },
   delete: {
     alignItems: "center",

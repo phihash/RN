@@ -66,7 +66,7 @@ export default function Home() {
         refreshing={false}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 96 }}
       />
-      <Link href="/word" asChild>
+      <Link href="/new" asChild>
         <Pressable style={styles.fab} accessibilityLabel="追加">
           <Ionicons name="add" size={32} color="#F2E8D9" />
         </Pressable>

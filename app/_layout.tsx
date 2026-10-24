@@ -14,14 +14,15 @@ function RootStack() {
       <Stack.Screen name="index" options={{ title: "コトノハメモ" }} />
       <Stack.Screen name="settings" options={{ title: "設定" }} />
       <Stack.Screen
-        name="word"
+        name="new"
         options={{
           headerShown: false,
-          presentation: "formSheet",
-          sheetAllowedDetents: "fitToContents",
-          sheetGrabberVisible: true,
+          // 見た目とアニメーションは components/Sheet で付ける
+          presentation: "transparentModal",
+          animation: "none",
         }}
       />
+      <Stack.Screen name="word" options={{ headerShown: false, presentation: "fullScreenModal" }} />
       {/* サインインは任意（審査 5.1.1(v)）。サインイン済みなら開けない */}
       <Stack.Protected guard={!user}>
         <Stack.Screen name="sign-in" options={{ headerShown: false, presentation: "modal" }} />
