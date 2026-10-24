@@ -1,19 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, Stack } from "expo-router";
-import { useRef, useState } from "react";
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type ScrollViewInstance } from "react-native";
+import { useState } from "react";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { getMemos, type Memo } from "../storage/memos";
 
-const TABS = [
+const KINDS = [
   ["word", "言葉"],
   ["phrase", "言い回し"],
 ] as const;
+const LABEL = Object.fromEntries(KINDS);
 
 export default function Home() {
-  const [kind, setKind] = useState<Memo["kind"]>("word");
-  const { width } = useWindowDimensions();
-  const pager = useRef<ScrollViewInstance>(null);
+  // カプセルをタップすると、その種類だけに絞る。もう一度タップで解除
+  const [filter, setFilter] = useState<Memo["kind"]>();
   const { data: memos = [], isPending, isError, refetch } = useQuery({
     queryKey: ["memos"],
     queryFn: getMemos,
@@ -32,57 +32,41 @@ export default function Home() {
           ),
         }}
       />
-      <View style={styles.tabs}>
-        {TABS.map(([value, label], i) => (
-          <Pressable
-            key={value}
-            style={styles.tab}
-            onPress={() => {
-              setKind(value);
-              pager.current?.scrollTo({ x: i * width });
-            }}
-          >
-            <Text style={[styles.tabText, kind === value && styles.tabTextActive]}>{label}</Text>
-            {kind === value && <View style={styles.tabBar} />}
-          </Pressable>
-        ))}
-      </View>
-      {/* 横スワイプでタブ切り替え（RN 標準の paging だけで実現） */}
-      <ScrollView
-        ref={pager}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(e) => setKind(TABS[Math.round(e.nativeEvent.contentOffset.x / width)][0])}
-      >
-        {TABS.map(([value, label]) => (
-          <FlatList
-            key={value}
-            style={{ width }}
-            data={memos.filter((m) => m.kind === value)}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <Link href={{ pathname: "/word", params: { id: item.id } }} asChild>
-                <Pressable style={styles.memo}>
-                  {item.kind === "word" && <Text style={styles.word}>{item.word}</Text>}
-                  <Text style={item.kind === "word" ? styles.description : styles.phrase}>{item.description}</Text>
+      {filter && (
+        <Pressable style={styles.filter} onPress={() => setFilter(undefined)} accessibilityLabel="絞り込みを解除">
+          <Text style={styles.filterText}>{LABEL[filter]}</Text>
+          <Ionicons name="close" size={16} color="#F2E8D9" />
+        </Pressable>
+      )}
+      <FlatList
+        data={filter ? memos.filter((m) => m.kind === filter) : memos}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <Link href={{ pathname: "/word", params: { id: item.id } }} asChild>
+            <Pressable style={styles.memo}>
+              <View style={styles.meta}>
+                <Pressable hitSlop={8} onPress={() => setFilter(filter ? undefined : item.kind)}>
+                  <Text style={styles.chip}>{LABEL[item.kind]}</Text>
                 </Pressable>
-              </Link>
-            )}
-            ListEmptyComponent={
-              isPending ? undefined : (
-                <Text style={styles.empty} onPress={isError ? () => refetch() : undefined}>
-                  {isError ? "読み込めませんでした（タップで再読み込み）" : `まだ${label}はありません`}
-                </Text>
-              )
-            }
-            onRefresh={refetch}
-            refreshing={false}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 96 }}
-          />
-        ))}
-      </ScrollView>
-      <Link href={{ pathname: "/word", params: { kind } }} asChild>
+                <Text style={styles.date}>{new Date(item.created_at).toLocaleDateString("ja-JP")}</Text>
+              </View>
+              {item.kind === "word" && <Text style={styles.word}>{item.word}</Text>}
+              <Text style={item.kind === "word" ? styles.description : styles.phrase}>{item.description}</Text>
+            </Pressable>
+          </Link>
+        )}
+        ListEmptyComponent={
+          isPending ? undefined : (
+            <Text style={styles.empty} onPress={isError ? () => refetch() : undefined}>
+              {isError ? "読み込めませんでした（タップで再読み込み）" : filter ? `${LABEL[filter]}はまだありません` : "まだメモはありません"}
+            </Text>
+          )
+        }
+        onRefresh={refetch}
+        refreshing={false}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 96 }}
+      />
+      <Link href="/word" asChild>
         <Pressable style={styles.fab} accessibilityLabel="追加">
           <Ionicons name="add" size={32} color="#F2E8D9" />
         </Pressable>
@@ -94,35 +78,7 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 16,
     backgroundColor: "#fff",
-  },
-  tabs: {
-    flexDirection: "row",
-    marginHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  tab: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  tabText: {
-    fontSize: 16,
-    color: "#999",
-  },
-  tabTextActive: {
-    color: "#192543",
-    fontWeight: "bold",
-  },
-  tabBar: {
-    position: "absolute",
-    bottom: -1,
-    width: 32,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: "#192543",
   },
   fab: {
     position: "absolute",
@@ -145,6 +101,42 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
     gap: 4,
+  },
+  filter: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 4,
+    marginHorizontal: 16,
+    marginTop: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: "#192543",
+  },
+  filterText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#F2E8D9",
+  },
+  meta: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  date: {
+    fontSize: 12,
+    color: "#999",
+  },
+  chip: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+    borderRadius: 999,
+    overflow: "hidden",
+    fontSize: 12,
+    color: "#192543",
+    backgroundColor: "#F2E8D9",
   },
   word: {
     fontSize: 18,

@@ -30,6 +30,11 @@ export default function Settings() {
     },
   });
 
+  const confirmSignOut = () =>
+    Alert.alert("サインアウトしますか？", "メモはアカウントに残り、もう一度サインインすると表示されます。", [
+      { text: "キャンセル", style: "cancel" },
+      { text: "サインアウト", onPress: () => logout.mutate() },
+    ]);
   const confirmDelete = () =>
     Alert.alert(
       "アカウントを削除しますか？",
@@ -56,7 +61,7 @@ export default function Settings() {
       </View>
       {user ? (
         <View style={styles.group}>
-          <Pressable style={styles.row} onPress={() => logout.mutate()}>
+          <Pressable style={styles.row} onPress={confirmSignOut}>
             <Text style={styles.rowText}>サインアウト</Text>
           </Pressable>
           <Pressable

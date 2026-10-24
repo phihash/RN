@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -5,12 +6,18 @@ import { Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-nativ
 import { track } from "../storage/analytics";
 import { addMemo, deleteMemo, updateMemo, type Memo } from "../storage/memos";
 
-// id があれば編集、なければ kind（一覧のタブ）で新規
+const KINDS = [
+  ["word", "言葉を書く", "book-outline"],
+  ["phrase", "言い回しを書く", "chatbubble-ellipses-outline"],
+] as const;
+
+// id があれば編集。新規はまず種類を選んでから、同じシートでフォームを出す
 export default function WordSheet() {
-  const params = useLocalSearchParams<{ id?: string; kind?: string }>();
+  const params = useLocalSearchParams<{ id?: string }>();
   const queryClient = useQueryClient();
   const memo = queryClient.getQueryData<Memo[]>(["memos"])?.find((m) => m.id === params.id);
-  const kind = memo?.kind ?? (params.kind === "phrase" ? "phrase" : "word");
+  const [picked, setPicked] = useState<Memo["kind"]>();
+  const kind = memo?.kind ?? picked ?? "word";
   const isWord = kind === "word";
   const [word, setWord] = useState(memo?.word ?? "");
   const [description, setDescription] = useState(memo?.description ?? "");
@@ -48,6 +55,19 @@ export default function WordSheet() {
       { text: "削除する", style: "destructive", onPress: () => memo && remove.mutate(memo.id) },
     ]);
 
+  if (!memo && !picked) {
+    return (
+      <View style={styles.menu}>
+        {KINDS.map(([value, label, icon]) => (
+          <Pressable key={value} style={styles.menuRow} onPress={() => setPicked(value)}>
+            <Ionicons name={icon} size={26} color="#192543" />
+            <Text style={styles.menuText}>{label}</Text>
+          </Pressable>
+        ))}
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {isWord && (
@@ -84,6 +104,22 @@ export default function WordSheet() {
 }
 
 const styles = StyleSheet.create({
+  menu: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 40,
+  },
+  menuRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    paddingVertical: 16,
+  },
+  menuText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#192543",
+  },
   container: {
     padding: 16,
     paddingTop: 24,
